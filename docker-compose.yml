@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+
+  # Servidor web com PHP 8 (Apache + PHP), onde vive o nosso site
+  web:
+    build: ./web
+    volumes:
+      - ./www:/var/www/html
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+
+  # Servidor de base de dados MySQL
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: bd_produtos
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+
+  # phpMyAdmin - interface gráfica para administrar o MySQL
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
